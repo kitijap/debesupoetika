@@ -5,8 +5,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Grid</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Debess ainava 4</title>
+    <link rel="stylesheet" href="../style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,23 +14,28 @@
   <body>
     <header class="header">
       <nav class="nav">
-        <a href="/index.html" class="nav-item nav-item-1">Debesu<br/>verosanas<br/>dizains</a>
-        <a href="/metodologija.html" class="nav-item nav-item-2">Metodoloģija</a>
+          <a href="../index.html" class="nav-item nav-item-1">
+              <object id="debesu-poetika" class="debesu-poetika" data="../assets/debesu_poetika.svg" type="image/svg+xml"></object>
+          </a>
+          <a href="../metodologija.html" class="nav-item nav-item-2">Metodoloģija</a>
       </nav>
-    </header>
+  </header>
     <main class="deb-content">
       <div class="data-container">
-        <p class="data"><strong>datums:</strong> nav <br>
+        <p class="data">
+          <strong class="virsraksts-datiem">debess novērojuma dati</strong><br><br>
+          <strong>datums:</strong> nav <br>
           <strong>laiks:</strong> nav <br>
-          <strong>tekstūras intensitāte:</strong> 1/5 <br>
-          <strong>pilsētas proporcija:</strong> 70 <br>
-          <strong>horizonta kontrasts:</strong> 20 <br>
-          <strong>gaismas krāsojums:</strong> 000, 000, 000 <br>
+          <strong>mākoņu intensitāte:</strong> 1/5 <br>
+          <strong>pilsētas proporcija:</strong> 70/100 <br>
+          <strong>horizonta kontrasts:</strong> 20/100 <br>
+          <strong>debess krāsojums:</strong> 182, 160, 138 <br>
           </p>
       </div>
         <div id="canvas-container">
         </div>
     </main>
     <script src="deb4.js"></script>
+    <script src="../index.js"></script>
   </body>
 </html>

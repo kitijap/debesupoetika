@@ -2,7 +2,7 @@ let img;
 let imgLoaded = false;
 let rectHeight = 30;
 let rectWidth;
-let blurAmount = 30;
+let blurAmount = 40;
 let blurSlider, heightSlider;
 
 let lines = [];
@@ -10,7 +10,15 @@ let lineColor;
 let targetLineColor;
 
 let lineLayer;
-let messiness = 3;
+let messiness = 2;
+
+let textureImg;
+
+let baseColor;
+
+function preload() {
+  textureImg = loadImage('../assets/texture.jpg');
+}
 
 function setup() {
   let canvas = createCanvas(900, 450);
@@ -19,15 +27,21 @@ function setup() {
 
   lineLayer = createGraphics(width, height);
 
+  baseColor = color(195, 70, 119);
+  lineColor = baseColor;
+  targetLineColor = baseColor;
+
   img = loadImage('debess-1.jpg', () => {
     imgLoaded = true;
     rectWidth = img.width + 30;
     extractLines();
     setupSliders(canvas);
   });
+}
 
-  lineColor = color(193, 155, 169);
-  targetLineColor = lineColor;
+function lightenColor(c, amount = 0.3) {
+  let white = color(255, 255, 255);
+  return lerpColor(c, white, amount);
 }
 
 function setupSliders(canvas) {
@@ -35,13 +49,11 @@ function setupSliders(canvas) {
   const centerX = canvasPos.x + width / 2;
   const centerY = canvasPos.y + height / 2;
 
-  // Horizontal blur slider (below canvas center)
   blurSlider = createSlider(0, 100, blurAmount);
   blurSlider.parent('canvas-container');
   blurSlider.position(centerX - rectWidth / 2, centerY + 230);
   blurSlider.style('width', `${rectWidth}px`);
 
-  // Vertical height slider (right of canvas center)
   heightSlider = createSlider(1, 100, rectHeight);
   heightSlider.parent('canvas-container');
   heightSlider.style('transform', 'rotate(270deg)');
@@ -49,7 +61,6 @@ function setupSliders(canvas) {
   heightSlider.style('width', `${img.height}px`);
   heightSlider.position(centerX + 440, centerY + 200);
 }
-
 
 function draw() {
   if (!imgLoaded) return;
@@ -65,10 +76,9 @@ function draw() {
     let distToCenter = dist(mouseX, mouseY, imgCenterX, imgCenterY);
     let maxDistToCorner = dist(imgCenterX, imgCenterY, imgX, imgY);
     let colorFactor = map(distToCenter, 0, maxDistToCorner, 1, 0);
-    let originalColor = color(193, 155, 169);
-    targetLineColor = lerpColor(originalColor, color(0, 0, 0), colorFactor);
+    targetLineColor = lerpColor(baseColor, color(0, 0, 0), colorFactor);
   } else {
-    targetLineColor = color(193, 155, 169);
+    targetLineColor = baseColor;
   }
 
   lineColor = lerpColor(lineColor, targetLineColor, 0.5);
@@ -92,15 +102,23 @@ function draw() {
 }
 
 function createGradient(x, y, width, height) {
-  let gradientMidpoint = map(blurAmount, 0, 100, 0, height);
-  blendMode(MULTIPLY);
+  blendMode(EXCLUSION);
+  let lighter = lightenColor(baseColor, 0.6);
+
   let grad = drawingContext.createLinearGradient(0, y, 0, y + height);
-  grad.addColorStop(0, 'rgba(213, 214, 215, 0)');
-  grad.addColorStop(1 - (blurAmount / 100), 'rgba(213, 214, 215, 1)');
-  grad.addColorStop(1, 'rgba(213, 214, 215, 1)');
+  grad.addColorStop(0, `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 0)`);
+  grad.addColorStop(1 - (blurAmount / 100), `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 1)`);
+  grad.addColorStop(1, `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 1)`);
   drawingContext.fillStyle = grad;
   noStroke();
   rect(x, y, width, height);
+
+  if (textureImg) {
+    blendMode(SCREEN);
+    image(textureImg, x, y, width, height);
+    noTint();
+  }
+
   blendMode(BLEND);
 }
 

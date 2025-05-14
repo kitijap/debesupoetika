@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Grid</title>
+    <title>Debesu poētika</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="header">
         <nav class="nav">
-            <a href="index.html" class="nav-item nav-item-1">Debesu<br/>verosanas<br/>dizains</a>
+            <a href="index.html" class="nav-item nav-item-1">
+                <object id="debesu-poetika" class="debesu-poetika" data="assets/debesu_poetika.svg" type="image/svg+xml"></object>
+            </a>
             <a href="metodologija.html" class="nav-item nav-item-2">Metodoloģija</a>
         </nav>
     </header>
-
+    
     <main class="main-content">
         <section class="image-grid">
             <a href="deb1/deb1.html" class="grid-item grid-item-1"><img src="assets/deb-1.png" alt="Image 1"></a>
@@ -41,11 +43,12 @@
             <a href="deb20/deb20.html" class="grid-item grid-item-20"><img src="assets/deb-20.png" alt="Image 20"></a>
         </section>
     </main>
-
+    
     <footer class="footer">
-        <p>Kitija Pekaine un Agnese Bebre</p>
+        <!-- <p>Kitija Pekaine un Agnese Bebre</p> -->
     </footer>
-
+    
+    <script src="infinite-grid.js"></script>
     <script src="index.js"></script>
 </body>
 </html>
