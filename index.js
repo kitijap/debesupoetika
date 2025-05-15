@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
           window.location.href = 'index.html';
       });
       
-      // Signal that SVG is ready
       window.svgReady = true;
       document.dispatchEvent(new CustomEvent('svgReady'));
   }

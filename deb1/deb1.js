@@ -15,6 +15,7 @@ let messiness = 2;
 let textureImg;
 
 let baseColor;
+let gradientColor;
 
 function preload() {
   textureImg = loadImage('../assets/texture.jpg');
@@ -28,6 +29,7 @@ function setup() {
   lineLayer = createGraphics(width, height);
 
   baseColor = color(195, 70, 119);
+  gradientColor = color(90, 90, 80);
   lineColor = baseColor;
   targetLineColor = baseColor;
 
@@ -103,12 +105,11 @@ function draw() {
 
 function createGradient(x, y, width, height) {
   blendMode(EXCLUSION);
-  let lighter = lightenColor(baseColor, 0.6);
-
+  
   let grad = drawingContext.createLinearGradient(0, y, 0, y + height);
-  grad.addColorStop(0, `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 0)`);
-  grad.addColorStop(1 - (blurAmount / 100), `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 1)`);
-  grad.addColorStop(1, `rgba(${red(lighter)}, ${green(lighter)}, ${blue(lighter)}, 1)`);
+  grad.addColorStop(0, `rgba(${red(gradientColor)}, ${green(gradientColor)}, ${blue(gradientColor)}, 0)`);
+  grad.addColorStop(1 - (blurAmount / 100), `rgba(${red(gradientColor)}, ${green(gradientColor)}, ${blue(gradientColor)}, 1)`);
+  grad.addColorStop(1, `rgba(${red(gradientColor)}, ${green(gradientColor)}, ${blue(gradientColor)}, 1)`);
   drawingContext.fillStyle = grad;
   noStroke();
   rect(x, y, width, height);
