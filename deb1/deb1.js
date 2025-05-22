@@ -11,14 +11,60 @@ let targetLineColor;
 
 let lineLayer;
 let messiness = 2;
-
 let textureImg;
-
 let baseColor;
 let gradientColor;
 
+// Performance optimizations
+let linesCached = false;
+let lastMouseRegion = null;
+let colorLerpSpeed = 0.3; // Increased for faster color change
+let isLowPerformanceDevice = false;
+let performanceMode = 'auto'; // 'high', 'medium', 'low', 'auto'
+
+// Mouse interaction throttling
+let lastMouseCheck = 0;
+let mouseCheckInterval = 30; // Reduced for more responsive interaction
+let lastMouseX = -1;
+let lastMouseY = -1;
+let mouseMoveThreshold = 5; // Reduced threshold for smoother interaction
+let colorTransitionActive = false; // Track if color is transitioning
+let colorTransitionTarget = null; // Track target color
+
 function preload() {
   textureImg = loadImage('../assets/texture.jpg');
+  
+  // Detect device performance
+  detectPerformance();
+}
+
+function detectPerformance() {
+  // Simple performance detection
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  
+  if (!gl) {
+    isLowPerformanceDevice = true;
+    performanceMode = 'low';
+    return;
+  }
+  
+  const renderer = gl.getParameter(gl.RENDERER);
+  const vendor = gl.getParameter(gl.VENDOR);
+  
+  // Check for integrated graphics or older hardware
+  if (renderer.includes('Intel') || 
+      renderer.includes('Software') || 
+      vendor.includes('Microsoft')) {
+    isLowPerformanceDevice = true;
+    performanceMode = 'medium';
+  }
+  
+  // Check memory (rough estimate)
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+    isLowPerformanceDevice = true;
+    performanceMode = 'low';
+  }
 }
 
 function setup() {
@@ -35,15 +81,22 @@ function setup() {
 
   img = loadImage('debess-1.jpg', () => {
     imgLoaded = true;
-    rectWidth = img.width + 30;
-    extractLines();
+    rectWidth = img.width - 4;
+    extractLinesOptimized();
     setupSliders(canvas);
+    
+    // Pre-render lines for performance
+    prerenderLines();
   });
-}
-
-function lightenColor(c, amount = 0.3) {
-  let white = color(255, 255, 255);
-  return lerpColor(c, white, amount);
+  
+  // Set frame rate based on performance
+  if (performanceMode === 'low') {
+    frameRate(30);
+  } else if (performanceMode === 'medium') {
+    frameRate(45);
+  } else {
+    frameRate(60);
+  }
 }
 
 function setupSliders(canvas) {
@@ -64,35 +117,113 @@ function setupSliders(canvas) {
   heightSlider.position(centerX + 440, centerY + 200);
 }
 
+function prerenderLines() {
+  if (!imgLoaded || linesCached) return;
+  
+  lineLayer.clear();
+  lineLayer.push();
+  lineLayer.translate(floor((width - img.width) / 2), floor((height - img.height) / 2));
+  
+  // Draw all lines once to the layer
+  for (let l of lines) {
+    l.color = baseColor;
+    l.show(lineLayer);
+  }
+  
+  lineLayer.pop();
+  linesCached = true;
+}
+
 function draw() {
   if (!imgLoaded) return;
 
   background(245, 245, 245);
-
+  
+  let needsRedraw = false;
   let imgX = floor((width - img.width) / 2);
   let imgY = floor((height - img.height) / 2);
+  
+  // Throttle mouse checking but allow for smooth color transitions
+  let currentTime = millis();
+  let mouseMovedSignificantly = abs(mouseX - lastMouseX) > mouseMoveThreshold || 
+                                abs(mouseY - lastMouseY) > mouseMoveThreshold;
+  
+  if (currentTime - lastMouseCheck > mouseCheckInterval && mouseMovedSignificantly) {
+    lastMouseCheck = currentTime;
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+    
+    let currentMouseRegion = 'outside';
+    if (mouseX >= imgX && mouseX <= imgX + img.width && 
+        mouseY >= imgY && mouseY <= imgY + img.height) {
+      currentMouseRegion = 'inside';
+    }
 
-  if (mouseX >= imgX && mouseX <= imgX + img.width && mouseY >= imgY && mouseY <= imgY + img.height) {
-    let imgCenterX = imgX + img.width / 2;
-    let imgCenterY = imgY + img.height / 2;
-    let distToCenter = dist(mouseX, mouseY, imgCenterX, imgCenterY);
-    let maxDistToCorner = dist(imgCenterX, imgCenterY, imgX, imgY);
-    let colorFactor = map(distToCenter, 0, maxDistToCorner, 1, 0);
-    targetLineColor = lerpColor(baseColor, color(0, 0, 0), colorFactor);
-  } else {
-    targetLineColor = baseColor;
+    // Recalculate target color when mouse region changes OR when inside and mouse moves
+    if (currentMouseRegion !== lastMouseRegion || currentMouseRegion === 'inside') {
+      lastMouseRegion = currentMouseRegion;
+      colorTransitionActive = true;
+      
+      if (currentMouseRegion === 'inside') {
+        let imgCenterX = imgX + img.width / 2;
+        let imgCenterY = imgY + img.height / 2;
+        let distToCenter = dist(mouseX, mouseY, imgCenterX, imgCenterY);
+        let maxDistToCorner = dist(imgCenterX, imgCenterY, imgX, imgY);
+        let colorFactor = map(distToCenter, 0, maxDistToCorner, 1, 0);
+        targetLineColor = lerpColor(baseColor, color(0, 0, 0), colorFactor);
+      } else {
+        targetLineColor = baseColor;
+      }
+      colorTransitionTarget = targetLineColor;
+    }
   }
 
-  lineColor = lerpColor(lineColor, targetLineColor, 0.5);
-
-  lineLayer.clear();
-  lineLayer.push();
-  lineLayer.translate(floor((width - img.width) / 2), floor((height - img.height) / 2));
-  for (let l of lines) {
-    l.color = lineColor;
-    l.show(lineLayer);
+  // Handle color transition - continue until colors match closely
+  if (colorTransitionActive) {
+    let oldLineColor = lineColor;
+    lineColor = lerpColor(lineColor, targetLineColor, colorLerpSpeed);
+    
+    // Check if we've reached the target color (within small tolerance)
+    let colorDiff = abs(red(lineColor) - red(targetLineColor)) + 
+                   abs(green(lineColor) - green(targetLineColor)) + 
+                   abs(blue(lineColor) - blue(targetLineColor));
+    
+    if (colorDiff < 3) {
+      // Close enough - snap to target color
+      lineColor = targetLineColor;
+      colorTransitionActive = false;
+    }
+    
+    // Redraw if color changed
+    if (abs(red(lineColor) - red(oldLineColor)) > 1 || 
+        abs(green(lineColor) - green(oldLineColor)) > 1 || 
+        abs(blue(lineColor) - blue(oldLineColor)) > 1) {
+      needsRedraw = true;
+    }
   }
-  lineLayer.pop();
+
+  // Redraw lines when necessary
+  if (needsRedraw || !linesCached) {
+    lineLayer.clear();
+    lineLayer.push();
+    lineLayer.translate(imgX, imgY);
+    
+    // Optimize line rendering based on performance
+    let renderStep = 1;
+    if (performanceMode === 'low') {
+      renderStep = 3; // Reduced from 4
+    } else if (performanceMode === 'medium') {
+      renderStep = 2;
+    }
+    
+    for (let i = 0; i < lines.length; i += renderStep) {
+      let l = lines[i];
+      l.color = lineColor;
+      l.show(lineLayer);
+    }
+    lineLayer.pop();
+  }
+
   image(lineLayer, 0, 0);
 
   let rectHeightMapped = map(heightSlider.value(), 1, 100, 1, img.height);
@@ -100,10 +231,19 @@ function draw() {
   let rectY = floor((height - img.height) / 2 + img.height - rectHeightMapped + 3);
   blurAmount = blurSlider.value();
 
-  createGradient(rectX, rectY, rectWidth, rectHeightMapped);
+  createGradientOptimized(rectX, rectY, rectWidth, rectHeightMapped);
 }
 
-function createGradient(x, y, width, height) {
+function createGradientOptimized(x, y, width, height) {
+  // Skip expensive blend modes on low performance devices
+  if (performanceMode === 'low') {
+    // Simple gradient without blend modes
+    fill(gradientColor._getRed(), gradientColor._getGreen(), gradientColor._getBlue(), 100);
+    noStroke();
+    rect(x, y, width, height);
+    return;
+  }
+  
   blendMode(EXCLUSION);
   
   let grad = drawingContext.createLinearGradient(0, y, 0, y + height);
@@ -114,7 +254,7 @@ function createGradient(x, y, width, height) {
   noStroke();
   rect(x, y, width, height);
 
-  if (textureImg) {
+  if (textureImg && performanceMode !== 'low') {
     blendMode(SCREEN);
     image(textureImg, x, y, width, height);
     noTint();
@@ -123,17 +263,39 @@ function createGradient(x, y, width, height) {
   blendMode(BLEND);
 }
 
-function extractLines() {
+function extractLinesOptimized() {
   if (!imgLoaded) return;
 
   img.loadPixels();
   lines = [];
+  
+  // Adjust parameters based on performance
+  let pixelStep, densityMultiplier, maxLayers;
+  
+  switch(performanceMode) {
+    case 'low':
+      pixelStep = 4; // Reduced from 6 to ensure better coverage
+      densityMultiplier = 0.15; // Slightly increased
+      maxLayers = 2; // Increased from 1
+      break;
+    case 'medium':
+      pixelStep = 3; // Reduced from 4
+      densityMultiplier = 0.25; // Slightly increased
+      maxLayers = 3; // Increased from 2
+      break;
+    default:
+      pixelStep = 2;
+      densityMultiplier = 0.3;
+      maxLayers = 4;
+  }
+  
   let scale = 0.02;
   let noiseStrength = map(messiness, 1, 5, PI / 12, PI / 2);
   let baseAngle = QUARTER_PI;
 
-  for (let y = 0; y < img.height; y += 2) {
-    for (let x = 0; x < img.width; x += 2) {
+  // Process entire image without line count limits
+  for (let y = 0; y < img.height; y += pixelStep) {
+    for (let x = 0; x < img.width; x += pixelStep) {
       let index = (x + y * img.width) * 4;
       let r = img.pixels[index];
       let g = img.pixels[index + 1];
@@ -141,10 +303,10 @@ function extractLines() {
       let brightnessValue = (r + g + b) / 3;
 
       let density = map(brightnessValue, 0, 255, 40, 1);
-      density = constrain(density * 0.3, 0, 40);
+      density = constrain(density * densityMultiplier, 0, 40);
 
       let textureFactor = map(brightnessValue, 0, 255, 0.5, 1.2);
-      let layers = int(map(brightnessValue, 0, 255, 4, 1));
+      let layers = int(map(brightnessValue, 0, 255, maxLayers, 1));
 
       let noiseVal = noise(x * scale, y * scale);
       let angleDeviation = map(noiseVal, 0, 1, -noiseStrength, noiseStrength);
@@ -166,8 +328,11 @@ function extractLines() {
       }
     }
   }
+  
+  console.log(`Generated ${lines.length} lines in ${performanceMode} performance mode`);
 }
 
+// Optimized LineSegment class
 class LineSegment {
   constructor(x, y, angle, length, color, alpha) {
     this.pos = createVector(x, y);
@@ -175,13 +340,15 @@ class LineSegment {
     this.length = length;
     this.color = color;
     this.alpha = alpha;
+    
+    // Pre-calculate end point
+    this.endX = x + cos(angle) * length;
+    this.endY = y + sin(angle) * length;
   }
 
   show(pg) {
     pg.stroke(red(this.color), green(this.color), blue(this.color), this.alpha);
     pg.strokeWeight(0.8);
-    let x2 = this.pos.x + cos(this.angle) * this.length;
-    let y2 = this.pos.y + sin(this.angle) * this.length;
-    pg.line(this.pos.x, this.pos.y, x2, y2);
+    pg.line(this.pos.x, this.pos.y, this.endX, this.endY);
   }
 }
