@@ -1,0 +1,657 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Overpass Mono", monospace;
+    background-color: #F5F5F5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative;
+    width: 100vw;
+}
+
+.header {
+    color: black;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    pointer-events: none;
+    background-color: rgba(245, 245, 245, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    width: 90vw;
+    padding-top: 20px;
+    pointer-events: auto;
+}
+
+.nav-item {
+    color: black;
+    text-decoration: none;
+    font-size: 1.75rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.nav-item-1 {
+    position: relative;
+    width: 250px;
+    height: 70px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    transform: translateX(-20px);
+}
+
+#debesu-poetika {
+    width: 100%;
+    height: 100%;
+}
+
+.nav-item-2 {
+    font-family: "Overpass Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
+    font-size: 1rem;
+    transform: translateY(-9px);
+}
+
+.nav-item-2:hover {
+    transform: rotate(90deg);
+}
+
+.main-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+}
+
+.metodologijas_nav{
+    display: flex;
+    flex-direction: row;
+    gap: 60px;
+    pointer-events: auto;
+    transform: translateY(-9px);
+}
+
+.metodologijas_nav a{
+    text-decoration: none;
+    text-transform: uppercase;
+    color: black;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.metodologijas_nav :hover{
+    text-decoration: underline;
+}
+
+.lielais_teksts{
+    font-family: "Overpass", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.875rem;
+    line-height: 1.6;
+    letter-spacing: 0.05rem;
+}
+
+.lielais_teksts strong{
+    font-weight: 400;
+    font-style: italic;
+}
+
+.mazais_teksts{
+    font-family: "Overpass", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1 rem;
+    line-height: 1.5;
+    letter-spacing: 0.05rem;
+}
+
+h2{
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+#par_projektu{
+    display: grid;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(10, 150px);
+    grid-template-rows: repeat(8, 150px);
+    max-width: 1500px;
+    margin: 120px auto 0 auto;
+    scroll-margin-top: 150px;
+}
+
+#par_projektu .lielais_teksts{
+    grid-column: 1 / 5;
+    grid-row: 2 / 4;
+    align-self: center;
+    padding-right: 5rem;
+}
+
+#par_projektu .mazais_teksts{
+    grid-column: 7 / 11;
+    grid-row: 4 / 5;
+    align-self: center;
+    padding: 0 9rem 0 3rem;
+}
+
+.par {
+    animation: simpleFade 20s infinite;
+    opacity: 1;
+}
+
+@keyframes simpleFade {
+    0% { opacity: 1; }
+    5% { opacity: 0; }
+    15% { opacity: 0; }
+    20% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+.par-1 { animation-delay: 0s; }
+.par-2 { animation-delay: 7s; }
+.par-3 { animation-delay: 14s; }
+.par-4 { animation-delay: 3s; }
+.par-5 { animation-delay: 11s; }
+.par-6 { animation-delay: 18s; }
+.par-7 { animation-delay: 5s; }
+.par-8 { animation-delay: 12s; }
+.par-9 { animation-delay: 2s; }
+.par-10 { animation-delay: 9s; }
+.par-11 { animation-delay: 16s; }
+.par-12 { animation-delay: 6s; }
+.par-13 { animation-delay: 13s; }
+.par-14 { animation-delay: 1s; }
+.par-15 { animation-delay: 8s; }
+.par-16 { animation-delay: 15s; }
+.par-17 { animation-delay: 4s; }
+.par-18 { animation-delay: 10s; }
+.par-19 { animation-delay: 17s; }
+.par-20 { animation-delay: 19s; }
+
+.par-1{
+    grid-column: 5 / 7;
+    grid-row: 1 / 2;
+    width: 300px;
+    height: 150px;
+}
+
+.par-2{
+    grid-column: 9 / 11;
+    grid-row: 1 / 2;
+    width: 300px;
+    height: 150px;
+}
+
+.par-3{
+    grid-column: 7 / 9;
+    grid-row: 2 / 3;
+    width: 300px;
+    height: 150px;
+}
+
+.par-4{
+    grid-column: 5 / 7;
+    grid-row: 3 / 4;
+    width: 300px;
+    height: 150px;
+}
+
+.par-5{
+    grid-column: 7 / 9;
+    grid-row: 3 / 4;
+    width: 300px;
+    height: 150px;
+}
+
+.par-6{
+    grid-column: 9 / 11;
+    grid-row: 3 / 4;
+    width: 300px;
+    height: 150px;
+}
+
+.par-7{
+    grid-column: 5 / 7;
+    grid-row: 4 / 5;
+    width: 300px;
+    height: 150px;
+}
+
+.par-8{
+    grid-column: 1 / 3;
+    grid-row: 5 / 6;
+    width: 300px;
+    height: 150px;
+}
+
+.par-9{
+    grid-column: 5 / 7;
+    grid-row: 5 / 6;
+    width: 300px;
+    height: 150px;
+}
+
+.par-10{
+    grid-column: 7 / 9;
+    grid-row: 5 / 6;
+    width: 300px;
+    height: 150px;
+}
+
+.par-11{
+    grid-column: 1 / 3;
+    grid-row: 6 / 7;
+    width: 300px;
+    height: 150px;
+}
+
+.par-12{
+    grid-column: 3 / 5;
+    grid-row: 6 / 7;
+    width: 300px;
+    height: 150px;
+}
+
+.par-13{
+    grid-column: 5 / 7;
+    grid-row: 6 / 7;
+    width: 300px;
+    height: 150px;
+}
+
+.par-14{
+    grid-column: 9 / 11;
+    grid-row: 6 / 7;
+    width: 300px;
+    height: 150px;
+}
+
+.par-15{
+    grid-column: 1 / 3;
+    grid-row: 7 / 8;
+    width: 300px;
+    height: 150px;
+}
+
+.par-16{
+    grid-column: 5 / 7;
+    grid-row: 7 / 8;
+    width: 300px;
+    height: 150px;
+}
+
+.par-17{
+    grid-column: 7 / 9;
+    grid-row: 7 / 8;
+    width: 300px;
+    height: 150px;
+}
+
+.par-18{
+    grid-column: 3 / 5;
+    grid-row: 8 / 9;
+    width: 300px;
+    height: 150px;
+}
+
+.par-19{
+    grid-column: 7 / 9;
+    grid-row: 8 / 9;
+    width: 300px;
+    height: 150px;
+}
+
+.par-20{
+    grid-column: 9 / 11;
+    grid-row: 8 / 9;
+    width: 300px;
+    height: 150px;
+}
+
+#verojumi{
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr repeat(10, 150px) 1fr;
+    grid-template-rows: repeat(6, 150px);
+    width: 100vw;
+    scroll-margin-top: 100px;
+}
+
+#verojumi .lielais_teksts{
+    grid-column: 7 / 12;
+    grid-row: 3 / 5;
+    align-self: center;
+}
+
+#verojumi .mazais_teksts{
+    grid-column: 7 / 11;
+    grid-row: 5 / 7;
+    padding-right: 7rem;
+}
+
+#verojumi h2{
+    grid-column: 7 / 8;
+    grid-row: 2 / 3;
+    transform: rotate(270deg);
+}
+
+.mediji{
+    grid-column: 4 / 6;
+    grid-row: 3 / 5;
+    width: 300px;
+}
+
+.linijas-1{
+    overflow: hidden;
+    grid-column: 1 / 5;
+    grid-row: 4 / 5;
+    z-index: -1;
+}
+
+.lokacija{
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr repeat(10, 150px) 1fr;
+    grid-template-rows: repeat(6, 150px);
+    width: 100vw;
+}
+
+.lokacija_teksts{
+    grid-column: 2 / 8;
+    grid-row: 2 / 6;
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+}
+
+.lokacija_teksts .mazais_teksts{
+    margin-left: 150px;
+    width: 450px;
+}
+
+.lokacija_teksts .lielais_teksts{
+    padding-right: 100px;
+}
+
+.balkons{
+    overflow: hidden;
+    grid-column: 8 / 13;
+    grid-row: 2 / 5;
+}
+
+.linijas-2{
+    grid-column: 8 / 13;
+    grid-row: 4 / 6;
+}
+
+#drukata_publikacija{
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr repeat(10, 150px) 1fr;
+    grid-template-rows: repeat(19, 150px);
+    width: 100vw;
+    scroll-margin-top: 150px;
+}
+
+#drukata_publikacija h2{
+    grid-column: 7 / 8;
+    grid-row: 1 / 2;
+    transform: rotate(270deg) translateX(-60px);
+}
+
+#drukata_publikacija .lielais_teksts{
+    grid-column: 7 / 12;
+    grid-row: 2 / 4;
+    align-self: flex-end;
+}
+
+.drukat-4{
+    grid-column: 2 / 12;
+    grid-row: 5 / 11;
+    align-self: center;
+    width: 1500px;
+    height: 750px;
+}
+
+.drukat-1{
+    grid-column: 3 / 5;
+    grid-row: 3 / 4;
+    width: 300px;
+    height: 150px;
+    z-index: +1;
+}
+
+.drukat-2{
+    grid-column: 3 / 5;
+    grid-row: 5 / 6;
+    width: 300px;
+    height: 150px;
+    z-index: +1;
+}
+
+.drukat-6{
+    grid-column: 7 / 8;
+    grid-row: 14 / 15;
+    width: 150px;
+    height: 150px;
+}
+
+.drukat-7{
+    grid-column: 7 / 8;
+    grid-row: 12 / 13;
+    width: 150px;
+    height: 150px;
+}
+
+.drukat-8{
+    grid-column: 5 / 7;
+    grid-row: 15 / 16;
+    width: 300px;
+    height: 150px;
+}
+
+.drukat-9{
+    grid-column: 3 / 5;
+    grid-row: 12 / 13;
+    width: 300px;
+    height: 150px;
+}
+
+.drukat-10{
+    grid-column: 3 / 5;
+    grid-row: 14 / 15;
+    width: 300px;
+    height: 150px;
+}
+
+.drukat-11{
+    grid-column: 5 / 7;
+    grid-row: 13 / 14;
+    width: 300px;
+    height: 150px;
+}
+
+.drukat-12{
+    grid-column: 11 / 13;
+    grid-row: 12 / 15;
+    overflow: hidden;
+    transform: translateX(+50px);
+}
+
+.drukat-3{
+    grid-column: 8 / 11;
+    grid-row: 17 / 20;
+    width: 450px;
+    height: 450px;
+}
+
+#drukata_publikacija .mazais_teksts{
+    grid-column: 3 / 6;
+    grid-row: 17 / 20;
+    align-self: center;
+}
+
+.pareja{
+    display: grid;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(10, 150px);
+    grid-template-rows: repeat(5, 150px);
+    max-width: 1500px;
+    margin: 0 auto 0 auto;
+}
+
+.krasas{
+    grid-column: 1 / 7;
+    grid-row: 1 / 6;
+    align-self: center;
+}
+
+.linijas-3{
+    grid-column: 6 / 11;
+    grid-row: 3 / 5;
+    align-self: center;
+}
+
+.kreisa_kolonna p{
+    margin-bottom: 10px;
+}
+
+#digitala_publikacija{
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr repeat(10, 150px) 1fr;
+    grid-template-rows: repeat(10, 150px);
+    width: 100vw;
+    scroll-margin-top: 150px;
+}
+
+.linijas-5{
+    grid-column: 1 / 6;
+    grid-row: 2 / 4;
+    align-self: center;
+    overflow: hidden;
+    transform: translateX(-75px);
+}
+
+.linijas-4{
+    grid-column: 1 / 9;
+    grid-row: 9 / 11;
+    align-self: flex-end;
+    transform: translateX(+10px);
+}
+
+.soli{
+    width: 300px;
+    height: 150px;
+    background-image: url(metodologija/solis-1.png);
+    grid-column: 2 / 4;
+    grid-row: 6 / 7;
+}
+
+#digitala_publikacija .lielais_teksts{
+    grid-column: 6 / 11;
+    grid-row: 2 / 4;
+    align-self: center;
+}
+
+#digitala_publikacija .mazais_teksts{
+    grid-column: 2 / 5;
+    grid-row: 5 / 6;
+    margin-right: 7rem;
+}
+
+.kolonna-1{
+    grid-column: 5 / 7;
+    grid-row: 5 / 8;
+    margin-right: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.kolonna-2{
+    grid-column: 7 / 9;
+    grid-row: 5 / 8;
+    margin-right: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.parametrs{
+    font-family: "Overpass", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 0.62rem;
+    line-height: 1.5;
+    letter-spacing: 0.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.parametrs strong{
+    font-family: "Overpass Mono", monospace;
+    font-weight: 800;
+    letter-spacing: 0rem;
+    text-transform: uppercase;
+}
+
+#digitala_publikacija h2{
+    grid-column: 6 / 7;
+    grid-row: 1 / 2;
+    transform: rotate(270deg) translateX(+30px);
+}
+
+.footer{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    grid-column: 10 / 12;
+    grid-row: 8 / 10;
+}
+
+.footer p{
+    font-family: "Overpass", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.05rem;
+}
+
+.footer p strong{
+    font-family: "Overpass Mono", monospace;
+    font-weight: 800;
+    letter-spacing: 0rem;
+    text-transform: uppercase;
+}

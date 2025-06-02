@@ -66,3 +66,153 @@ document.addEventListener('DOMContentLoaded', function() {
       svgObject.addEventListener('load', handleSVGLoad);
   }
 });
+
+(function() {
+    let inactivityTimer;
+    const TIMEOUT_MINUTES = 3;
+    const TIMEOUT_MS = TIMEOUT_MINUTES * 60 * 1000;
+    
+    const activityEvents = [
+        'mousedown',
+        'mousemove', 
+        'keypress',
+        'scroll',
+        'touchstart',
+        'click',
+        'wheel'
+    ];
+    
+    function resetTimer() {
+        clearTimeout(inactivityTimer);
+        
+        inactivityTimer = setTimeout(() => {
+            window.location.href = 'index.html';
+        }, TIMEOUT_MS);
+    }
+    
+    function startActivityMonitoring() {
+        activityEvents.forEach(event => {
+            document.addEventListener(event, resetTimer, true);
+        });
+        
+        resetTimer();
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startActivityMonitoring);
+    } else {
+        startActivityMonitoring();
+    }
+    
+    window.autoReload = {
+        start: startActivityMonitoring,
+        stop: () => {
+            clearTimeout(inactivityTimer);
+            activityEvents.forEach(event => {
+                document.removeEventListener(event, resetTimer, true);
+            });
+        },
+        resetTimer: resetTimer
+    };
+})();
+
+(function() {
+    if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/') {
+        return;
+    }
+    
+    let cueTimer;
+    let messageElement;
+    const INACTIVITY_TIME = 20 * 1000;
+    
+    const activityEvents = [
+        'mousedown',
+        'mousemove', 
+        'keypress',
+        'scroll',
+        'touchstart',
+        'click',
+        'wheel'
+    ];
+    
+    function createMessage() {
+        if (messageElement) return;
+        
+        messageElement = document.createElement('div');
+        messageElement.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 300px;
+            background: rgba(245, 245, 245, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Overpass Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #333;
+            text-align: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        `;
+        
+        messageElement.innerHTML = `
+            <div>noklikšķini un pavelc uz jebkuru pusi</div>
+        `;
+        document.body.appendChild(messageElement);
+        
+        setTimeout(() => {
+            messageElement.style.opacity = '1';
+        }, 100);
+    }
+    
+    function hideMessage() {
+        if (!messageElement) return;
+        
+        messageElement.style.opacity = '0';
+        setTimeout(() => {
+            if (messageElement && messageElement.parentNode) {
+                messageElement.parentNode.removeChild(messageElement);
+                messageElement = null;
+            }
+        }, 500);
+    }
+    
+    function showCue() {
+        createMessage();
+    }
+    
+    function resetCueTimer() {
+        clearTimeout(cueTimer);
+        hideMessage();
+        
+        cueTimer = setTimeout(showCue, INACTIVITY_TIME);
+    }
+    
+    function onActivity() {
+        resetCueTimer();
+    }
+    
+    function startCueMonitoring() {
+        activityEvents.forEach(event => {
+            document.addEventListener(event, onActivity, true);
+        });
+        
+        setTimeout(showCue, 2000);
+        resetCueTimer();
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startCueMonitoring);
+    } else {
+        startCueMonitoring();
+    }
+})();

@@ -18,48 +18,18 @@ let gradientColor;
 // Performance optimizations
 let linesCached = false;
 let lastMouseRegion = null;
-let colorLerpSpeed = 0.3; // Increased for faster color change
+let colorLerpSpeed = 0.1; // Reduced from 0.5
 let isLowPerformanceDevice = false;
 let performanceMode = 'auto'; // 'high', 'medium', 'low', 'auto'
 
-// Mouse interaction throttling - varies by device performance
+// Mouse interaction throttling
 let lastMouseCheck = 0;
-let mouseCheckInterval = 30; // Default
+let mouseCheckInterval = 50; // Check mouse every 50ms instead of every frame
 let lastMouseX = -1;
 let lastMouseY = -1;
-let mouseMoveThreshold = 5; // Default
-let colorTransitionActive = false;
-let colorTransitionTarget = null;
-
-// Interaction rendering optimization - varies by device
-let interactionRenderStep = 1; // How many lines to skip during interaction
-
-function setupInteractionOptimization() {
-  // Adjust interaction parameters based on device capability
-  const interactionMode = window.interactionMode || 'high';
-  
-  switch(interactionMode) {
-    case 'low':
-      mouseCheckInterval = 50; // Check mouse less frequently
-      mouseMoveThreshold = 8; // Larger movement needed
-      interactionRenderStep = 4; // Render every 4th line during interaction
-      colorLerpSpeed = 0.2; // Slower color transition
-      break;
-    case 'medium':
-      mouseCheckInterval = 35;
-      mouseMoveThreshold = 6;
-      interactionRenderStep = 2; // Render every 2nd line during interaction
-      colorLerpSpeed = 0.25;
-      break;
-    default: // high
-      mouseCheckInterval = 20; // Very responsive
-      mouseMoveThreshold = 3;
-      interactionRenderStep = 1; // Render all lines
-      colorLerpSpeed = 0.3;
-  }
-  
-  console.log(`Interaction optimization: render step ${interactionRenderStep}, check interval ${mouseCheckInterval}ms`);
-}
+let mouseMoveThreshold = 10; // Only update if mouse moved significantly
+let colorTransitionFrames = 0;
+let maxColorTransitionFrames = 30; // Limit color transition duration
 
 function preload() {
   textureImg = loadImage('../assets/texture.jpg');
@@ -69,43 +39,36 @@ function preload() {
 }
 
 function detectPerformance() {
-  // Always generate high-quality lines, but optimize interactions based on device
+  // Simple performance detection
   const canvas = document.createElement('canvas');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
   
-  // Visual quality is always high - only interaction performance varies
-  let interactionMode = 'high';
-  
   if (!gl) {
-    interactionMode = 'low';
-  } else {
-    const renderer = gl.getParameter(gl.RENDERER);
-    const vendor = gl.getParameter(gl.VENDOR);
-    
-    if (renderer.includes('Software')) {
-      interactionMode = 'low';
-    } else if (renderer.includes('Intel') && !renderer.includes('Iris')) {
-      interactionMode = 'medium';
-    }
-    
-    if (navigator.deviceMemory && navigator.deviceMemory < 2) {
-      interactionMode = 'low';
-    }
+    isLowPerformanceDevice = true;
+    performanceMode = 'low';
+    return;
   }
   
-  // Always high visual quality, variable interaction performance
-  performanceMode = 'high'; // Visual quality
-  isLowPerformanceDevice = (interactionMode !== 'high');
+  const renderer = gl.getParameter(gl.RENDERER);
+  const vendor = gl.getParameter(gl.VENDOR);
   
-  console.log(`Visual quality: HIGH (dense lines)`);
-  console.log(`Interaction performance: ${interactionMode}`);
+  // Check for integrated graphics or older hardware
+  if (renderer.includes('Intel') || 
+      renderer.includes('Software') || 
+      vendor.includes('Microsoft')) {
+    isLowPerformanceDevice = true;
+    performanceMode = 'medium';
+  }
   
-  // Store interaction mode separately
-  window.interactionMode = interactionMode;
+  // Check memory (rough estimate)
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+    isLowPerformanceDevice = true;
+    performanceMode = 'low';
+  }
 }
 
 function setup() {
-  let canvas = createCanvas(900, 450);
+  let canvas = createCanvas(950, 525);
   canvas.parent('canvas-container');
   background(245, 245, 245);
 
@@ -121,14 +84,19 @@ function setup() {
     rectWidth = img.width - 4;
     extractLinesOptimized();
     setupSliders(canvas);
-    setupInteractionOptimization(); // Setup interaction performance
     
     // Pre-render lines for performance
     prerenderLines();
   });
   
-  // Always 60fps for smooth interactions
-  frameRate(60);
+  // Set frame rate based on performance
+  if (performanceMode === 'low') {
+    frameRate(30);
+  } else if (performanceMode === 'medium') {
+    frameRate(45);
+  } else {
+    frameRate(60);
+  }
 }
 
 function setupSliders(canvas) {
@@ -174,76 +142,52 @@ function draw() {
   let needsRedraw = false;
   let imgX = floor((width - img.width) / 2);
   let imgY = floor((height - img.height) / 2);
-  
-  // Throttle mouse checking but allow for smooth color transitions
-  let currentTime = millis();
-  let mouseMovedSignificantly = abs(mouseX - lastMouseX) > mouseMoveThreshold || 
-                                abs(mouseY - lastMouseY) > mouseMoveThreshold;
-  
-  if (currentTime - lastMouseCheck > mouseCheckInterval && mouseMovedSignificantly) {
-    lastMouseCheck = currentTime;
-    lastMouseX = mouseX;
-    lastMouseY = mouseY;
-    
-    let currentMouseRegion = 'outside';
-    if (mouseX >= imgX && mouseX <= imgX + img.width && 
-        mouseY >= imgY && mouseY <= imgY + img.height) {
-      currentMouseRegion = 'inside';
-    }
 
-    // Recalculate target color when mouse region changes OR when inside and mouse moves
-    if (currentMouseRegion !== lastMouseRegion || currentMouseRegion === 'inside') {
-      lastMouseRegion = currentMouseRegion;
-      colorTransitionActive = true;
-      
-      if (currentMouseRegion === 'inside') {
-        let imgCenterX = imgX + img.width / 2;
-        let imgCenterY = imgY + img.height / 2;
-        let distToCenter = dist(mouseX, mouseY, imgCenterX, imgCenterY);
-        let maxDistToCorner = dist(imgCenterX, imgCenterY, imgX, imgY);
-        let colorFactor = map(distToCenter, 0, maxDistToCorner, 1, 0);
-        targetLineColor = lerpColor(baseColor, color(0, 0, 0), colorFactor);
-      } else {
-        targetLineColor = baseColor;
-      }
-      colorTransitionTarget = targetLineColor;
+  // Optimize mouse region checking
+  let currentMouseRegion = 'outside';
+  if (mouseX >= imgX && mouseX <= imgX + img.width && 
+      mouseY >= imgY && mouseY <= imgY + img.height) {
+    currentMouseRegion = 'inside';
+  }
+
+  // Only recalculate if mouse region changed
+  if (currentMouseRegion !== lastMouseRegion) {
+    needsRedraw = true;
+    lastMouseRegion = currentMouseRegion;
+    
+    if (currentMouseRegion === 'inside') {
+      let imgCenterX = imgX + img.width / 2;
+      let imgCenterY = imgY + img.height / 2;
+      let distToCenter = dist(mouseX, mouseY, imgCenterX, imgCenterY);
+      let maxDistToCorner = dist(imgCenterX, imgCenterY, imgX, imgY);
+      let colorFactor = map(distToCenter, 0, maxDistToCorner, 1, 0);
+      targetLineColor = lerpColor(baseColor, color(0, 0, 0), colorFactor);
+    } else {
+      targetLineColor = baseColor;
     }
   }
 
-  // Handle color transition - continue until colors match closely
-  if (colorTransitionActive) {
-    let oldLineColor = lineColor;
-    lineColor = lerpColor(lineColor, targetLineColor, colorLerpSpeed);
-    
-    // Check if we've reached the target color (within small tolerance)
-    let colorDiff = abs(red(lineColor) - red(targetLineColor)) + 
-                   abs(green(lineColor) - green(targetLineColor)) + 
-                   abs(blue(lineColor) - blue(targetLineColor));
-    
-    if (colorDiff < 3) {
-      // Close enough - snap to target color
-      lineColor = targetLineColor;
-      colorTransitionActive = false;
-    }
-    
-    // Redraw if color changed
-    if (abs(red(lineColor) - red(oldLineColor)) > 1 || 
-        abs(green(lineColor) - green(oldLineColor)) > 1 || 
-        abs(blue(lineColor) - blue(oldLineColor)) > 1) {
-      needsRedraw = true;
-    }
+  // Smooth color transition
+  let oldLineColor = lineColor;
+  lineColor = lerpColor(lineColor, targetLineColor, colorLerpSpeed);
+  
+  // Only redraw if color changed significantly
+  if (abs(red(lineColor) - red(oldLineColor)) > 2 || 
+      abs(green(lineColor) - green(oldLineColor)) > 2 || 
+      abs(blue(lineColor) - blue(oldLineColor)) > 2) {
+    needsRedraw = true;
   }
 
-  // Redraw lines when necessary
+  // Redraw lines only when necessary
   if (needsRedraw || !linesCached) {
     lineLayer.clear();
     lineLayer.push();
     lineLayer.translate(imgX, imgY);
     
-    // Adaptive rendering during interaction - only affects interaction smoothness, not final quality
-    let currentRenderStep = colorTransitionActive ? interactionRenderStep : 1;
+    // Reduced line rendering for low performance
+    let renderStep = performanceMode === 'low' ? 3 : 1;
     
-    for (let i = 0; i < lines.length; i += currentRenderStep) {
+    for (let i = 0; i < lines.length; i += renderStep) {
       let l = lines[i];
       l.color = lineColor;
       l.show(lineLayer);
@@ -296,16 +240,31 @@ function extractLinesOptimized() {
   img.loadPixels();
   lines = [];
   
-  // ALWAYS use high-quality line generation - visual quality is consistent
-  let pixelStep = 2;
-  let densityMultiplier = 0.3;
-  let maxLayers = 4;
+  // Adjust parameters based on performance
+  let pixelStep, densityMultiplier, maxLayers;
+  
+  switch(performanceMode) {
+    case 'low':
+      pixelStep = 4; // Reduced from 6 to ensure better coverage
+      densityMultiplier = 0.15; // Slightly increased
+      maxLayers = 2; // Increased from 1
+      break;
+    case 'medium':
+      pixelStep = 3; // Reduced from 4
+      densityMultiplier = 0.25; // Slightly increased
+      maxLayers = 3; // Increased from 2
+      break;
+    default:
+      pixelStep = 2;
+      densityMultiplier = 0.3;
+      maxLayers = 4;
+  }
   
   let scale = 0.02;
   let noiseStrength = map(messiness, 1, 5, PI / 12, PI / 2);
   let baseAngle = QUARTER_PI;
 
-  // Generate lots of lines on ALL computers for consistent visual quality
+  // Process entire image without line count limits
   for (let y = 0; y < img.height; y += pixelStep) {
     for (let x = 0; x < img.width; x += pixelStep) {
       let index = (x + y * img.width) * 4;
@@ -341,7 +300,7 @@ function extractLinesOptimized() {
     }
   }
   
-  console.log(`Generated ${lines.length} lines (HIGH QUALITY on all devices)`);
+  console.log(`Generated ${lines.length} lines in ${performanceMode} performance mode`);
 }
 
 // Optimized LineSegment class
