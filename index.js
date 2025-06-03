@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         messageElement.innerHTML = `
-            <div>lai pārvietotos, noklikšķini brīvajos laukumos<br>un turot pavelc uz jebkuru pusi</div>
+            <div>noklikšķini brīvajos laukumos un<br>turot pavelc uz jebkuru pusi</div>
         `;
         document.body.appendChild(messageElement);
           
