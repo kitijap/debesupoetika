@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   (function() {
       let inactivityTimer;
-      const TIMEOUT_MINUTES = 3;
+      const TIMEOUT_MINUTES = 2;
       const TIMEOUT_MS = TIMEOUT_MINUTES * 60 * 1000;
       
       const activityEvents = [
