@@ -569,12 +569,38 @@ h2{
     transform: translateX(+10px);
 }
 
-.soli{
+.soli {
     width: 300px;
     height: 150px;
     background-image: url(metodologija/solis-1.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     grid-column: 2 / 4;
     grid-row: 6 / 7;
+    
+    animation: backgroundCycle 12s infinite;
+}
+
+@keyframes backgroundCycle {
+    0%, 16.66% {
+        background-image: url(metodologija/solis-1.png);
+    }
+    16.67%, 33.33% {
+        background-image: url(metodologija/solis-2.png);
+    }
+    33.34%, 50% {
+        background-image: url(metodologija/solis-3.png);
+    }
+    50.01%, 66.66% {
+        background-image: url(metodologija/solis-4.png);
+    }
+    66.67%, 83.33% {
+        background-image: url(metodologija/solis-5.png);
+    }
+    83.34%, 100% {
+        background-image: url(metodologija/solis-6.png);
+    }
 }
 
 #digitala_publikacija .lielais_teksts{
