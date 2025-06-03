@@ -35,7 +35,7 @@ function setup() {
 
   img = loadImage('debess-13.jpg', () => {
     imgLoaded = true;
-    rectWidth = img.width + 30;
+    rectWidth = img.width - 4;
     extractLines();
     setupSliders(canvas);
   });
