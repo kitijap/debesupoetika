@@ -141,35 +141,34 @@ document.addEventListener('DOMContentLoaded', function() {
           messageElement = document.createElement('div');
           messageElement.style.cssText = `
               position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 600px;
-              height: 300px;
-              background: rgba(245, 245, 245, 0.1);
-              backdrop-filter: blur(10px);
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              gap: 20px;
-              font-family: 'Overpass Mono', monospace;
-              font-size: 0.9rem;
-              font-weight: 400;
-              color: #333;
-              text-align: center;
-              z-index: 9999;
-              opacity: 0;
-              transition: opacity 0.5s ease-in-out;
-              pointer-events: none;
-              border-radius: 20px;
-              box-shadow: 0 0 30px rgba(245, 245, 245, 0.3);
-          `;
-          
-          messageElement.innerHTML = `
-              <div>noklikšķini un pavelc uz jebkuru pusi</div>
-          `;
-          document.body.appendChild(messageElement);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 300px;
+            background: rgba(245, 245, 245, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Overpass Mono', monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-weight: 400;
+            color: #333;
+            text-align: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        `;
+        
+        messageElement.innerHTML = `
+            <div>lai pārvietotos, noklikšķini un<br>turot pavelc uz jebkuru pusi</div>
+        `;
+        document.body.appendChild(messageElement);
           
           setTimeout(() => {
               messageElement.style.opacity = '1';
